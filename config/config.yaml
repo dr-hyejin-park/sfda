@@ -1,0 +1,67 @@
+data:
+  n_source_customers: 10000
+  n_target_customers: 5000
+  n_common_customers: 1000
+  n_source_specific_features: 60   # features only in source
+  n_common_features: 20             # features in both domains
+  n_target_specific_features: 20   # features only in target
+  n_indices: 10
+  random_seed: 42
+
+model:
+  d_model: 128
+  n_heads: 4
+  n_layers: 4
+  d_ff: 256
+  dropout: 0.1
+  bottleneck_dim: 64
+  n_partitions: 4         # for vertical partitioning
+  max_seq_len: 128
+
+training:
+  step1:
+    epochs: 50
+    batch_size: 256
+    lr: 1.0e-4
+    temperature: 0.07
+    n_partitions: 4
+    warmup_epochs: 5
+
+  step2:
+    epochs: 40
+    batch_size: 128
+    lr: 5.0e-5
+    focal_alpha: 0.25
+    focal_gamma: 2.0
+    warmup_epochs: 3
+    lambda_reg: 0.3         # weight for regression head
+
+  step3:
+    epochs: 40
+    batch_size: 128
+    lr: 5.0e-5
+    focal_alpha: 0.25
+    focal_gamma: 2.0
+    lambda_reg: 0.3
+
+  step4:
+    epochs: 60
+    batch_size: 128
+    lr: 1.0e-4
+    focal_alpha: 0.25
+    focal_gamma: 2.0
+    lambda_reg: 0.3
+    pseudo_label_threshold: 0.65
+    n_neighbors: 15
+    lambda_align: 0.1        # feature alignment loss weight
+    lambda_cluster: 0.1      # spectral clustering loss weight
+    lambda_aug: 0.05         # augmentation consistency loss weight
+    ema_decay: 0.999         # EMA for teacher model
+    warmup_epochs: 5
+
+evaluation:
+  binary_threshold: 5.5     # threshold for high/low classification
+
+paths:
+  checkpoint_dir: checkpoints
+  results_dir: results
